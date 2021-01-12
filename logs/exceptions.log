@@ -1,0 +1,4 @@
+[ERROR] 2021-01-12 09:28:14.418 [AWT-EventQueue-0] PasswordPage - java.security.ProviderException: Library c:/Windows/System32/eTPKCS11.dll does not exist
+[ERROR] 2021-01-12 13:18:50.371 [AWT-EventQueue-0] PasswordPage - java.security.ProviderException: Library c:/Windows/System32/eTPKCS11.dll does not exist
+[ERROR] 2021-01-12 13:21:50.152 [AWT-EventQueue-0] PasswordPage - java.security.ProviderException: Library c:/Windows/System32/eTPKCS11.dll does not exist
+[ERROR] 2021-01-12 13:44:00.411 [AWT-EventQueue-0] PasswordPage - java.security.ProviderException: Library c:/Windows/System32/eTPKCS11.dll does not exist
