@@ -86,9 +86,14 @@ public class PasswordPage {
 				String thePassword = new String(passwordField.getPassword());
 				try {
 		        	int dialogResult = JOptionPane.showConfirmDialog(null, "Döküman imzalanacak. Onaylıyor musunuz?", "İmza Onayı", JOptionPane.YES_NO_OPTION);
+		        	System.out.println(dialogResult);
 					if(dialogResult == JOptionPane.YES_OPTION){
 						if(signDocument("C:/temp/", "ALADDIN", thePassword, document.getPath(), loadPath+"signed_"+document.getTransactionId())) {
+							System.out.println("Girdi if");
 							JOptionPane.showMessageDialog(null,"Döküman başarıyla imzalanmıştır.","İmzalama Başarılı",JOptionPane.INFORMATION_MESSAGE);
+						}else {
+							JOptionPane.showMessageDialog(null,"Döküman imzalanamamıştır!","İmzalama Başarısız!",JOptionPane.ERROR_MESSAGE);
+
 						}
 					} 
 				}catch(Exception e1) {
@@ -130,7 +135,9 @@ public class PasswordPage {
 		
 		try {
 			Driver driver = new Driver(contextpath,cardType);
+			
 			java.security.cert.Certificate[] chain = driver.createCertificateChain(password);
+			System.out.println("wlrg");
 			if(chain==null) {
 				return false;
 			}
