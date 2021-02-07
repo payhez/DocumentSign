@@ -1,125 +1,51 @@
 package com.intecon.docsign.main;
 
-import java.awt.AWTException;
-import java.awt.EventQueue;
-import java.awt.Image;
-import java.awt.MenuItem;
-import java.awt.PopupMenu;
-import java.awt.SystemTray;
-import java.awt.Toolkit;
-import java.awt.TrayIcon;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.IOException;
+import java.io.File;
 
-import javax.imageio.ImageIO;
-
-import com.intecon.docsign.config.ConfigPage;
-import com.intecon.docsign.log.LogPage;
+import com.intecon.docsign.log.LogCreator;
+import com.intecon.socket.client.SocketClient;
 
 public class ClientAppMain {
+	private static String SIGNED_URL = "C:/Temp/Signed/";
+	private static String UNSIGNED_URL = "C:/Temp/UnSigned/";
+	 
 	  public static void main(String args[]) {
 		  
-		    Runnable runner = new Runnable() {
-				@Override
-				public void run() {
-					// TODO Auto-generated method stub
-					if(SystemTray.isSupported()) {
-						
-						final SystemTray tray = SystemTray.getSystemTray();
+		  int port = 8080;
 
-				          Image image = Toolkit.getDefaultToolkit().getImage("src/resources/icon.png");
-				          PopupMenu popup = new PopupMenu();
-				          final TrayIcon trayIcon = new TrayIcon(image, "Intecon Döküman İmzalama", popup);
-				          
-				          MenuItem item = new MenuItem("İmza Bekleyen Dökümanlar");
-				          item.addActionListener(new ActionListener() {
-				        	  public void actionPerformed(ActionEvent e) {
-			        			  EventQueue.invokeLater(new Runnable() {
-					    			public void run() {
-					    				try {
-					    					ListPage listPage = new ListPage();
-					    					listPage.getFrame().setVisible(true);
-					    				} catch (Exception e) {
-					    					e.printStackTrace();
-					    				}
-					    			}
-			        			  });
-			        		  }
-				          });
-						  popup.add(item);
-						  
-				          item = new MenuItem("Ayarlar");
-				          item.addActionListener(new ActionListener() {
-				        	  public void actionPerformed(ActionEvent e) {
-				        		  EventQueue.invokeLater(new Runnable() {
-						    			public void run() {
-						    				try {
-						    					ConfigPage configWindow = new ConfigPage();
-						    					configWindow.getFrame().setVisible(true);
-						    				} catch (Exception e) {
-						    					e.printStackTrace();
-						    				}
-						    			}
-						    		});
-			        		  }
-				          });
-						  popup.add(item);
-						  
-						  item = new MenuItem("LOG");
-				          item.addActionListener(new ActionListener() {
-				        	  public void actionPerformed(ActionEvent e) {
-				        		  EventQueue.invokeLater(new Runnable() {
-						    			public void run() {
-						    				try {
-						    					LogPage logWindow = new LogPage();
-						    					logWindow.getFrame().setVisible(true);
-						    				} catch (Exception e) {
-						    					e.printStackTrace();
-						    				}
-						    			}
-						    		});
-			        		  }
-				          });
-						  popup.add(item);
-						  
-				          item = new MenuItem("Kapat");
-				          item.addActionListener(new ActionListener() {
-				        	  public void actionPerformed(ActionEvent e) {
-				        		  tray.remove(trayIcon);
-			        		  }
-				          });
-				          popup.add(item);
-				          
-				          trayIcon.addActionListener(new ActionListener() {
-							@Override
-							public void actionPerformed(ActionEvent e) {
-								// TODO Auto-generated method stub
-						        trayIcon.displayMessage("Imzalanmayı Bekleyen Dökümanlarınız Var!", "Imzalamak için buraya tıklayınız." ,TrayIcon.MessageType.INFO);
-					        	
-					        	EventQueue.invokeLater(new Runnable() {
-					    			public void run() {
-					    				try {
-					    					ListPage listPage = new ListPage();
-					    					listPage.getFrame().setVisible(true);
-					    				} catch (Exception e) {
-					    					e.printStackTrace();
-					    				}
-					    			}
-					    		});
-							}
-				          });
-				          
-				          try {
-				            tray.add(trayIcon);
-				          } catch (AWTException e) {
-				            System.err.println("Can't add to tray");
-				          }
-					} else {
-				          System.err.println("Tray unavailable");
-			        }
+		  File theDir = new File(SIGNED_URL);    
+			if (!theDir.exists()){
+			    theDir.mkdirs();
+			}
+			theDir = new File(UNSIGNED_URL);
+			if (!theDir.exists()){
+			    theDir.mkdirs();
+			}
+		  clearUnsignedFolder(); // Deletes unnecessary folders in the opening
+		  //String url = "ws://localhost:{port}/DocumentSigningService/gs-guide-websocket";
+		  String url = "ws://10.0.0.68:{port}/demo/gs-guide-websocket";
+		  
+		  try {
+			  AppRunner.runApp();
+			  SocketClient sc = new SocketClient();
+			  sc.setup(url, port,"furat");
+			  sc.start();
+			  sc.getSession().send("/app/registration/furat", "FURAT");
+			  LogCreator.info("Connected!", ClientAppMain.class.getName());
+
+			} catch (Exception e) {
+				LogCreator.error("Not connected! " +e.toString(), ClientAppMain.class.getName());
+			}
+	  }
+	  
+	  private static void clearUnsignedFolder() {
+		File path = new File(UNSIGNED_URL);
+		if(path.exists()) {
+			 for (final File dateFolder : path.listFiles()) {
+				if(dateFolder.isDirectory() && dateFolder.list().length == 0) {
+					dateFolder.delete();
 				}
-		    };
-		    EventQueue.invokeLater(runner);
+			 }
+		 }
 	  }
 }

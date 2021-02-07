@@ -23,36 +23,14 @@ public class PdfViewPage {
 
 	private JFrame frmDkmanGrntleme;
 	private JButton signButton;
-
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		UIUtils.setPreferredLookAndFeel();
-		NativeInterface.open();
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					PdfViewPage window = new PdfViewPage(null);
-					window.frmDkmanGrntleme.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
-
-	/**
-	 * Create the application.
-	 */
-	public PdfViewPage(DocumentToSign document) {
+	private JFrame listView;
+	
+	public PdfViewPage(DocumentModel document, JFrame listView) {
 		initialize(document);
+		this.listView = listView;
 	}
-
-	/**
-	 * Initialize the contents of the frame.
-	 */
-	private void initialize(DocumentToSign document) {
+	
+	private void initialize(DocumentModel document) {
 		frmDkmanGrntleme = new JFrame();
 		frmDkmanGrntleme.setTitle("Döküman Görüntüleme");
 		frmDkmanGrntleme.setBounds(100, 70, 954, 782);
@@ -65,15 +43,13 @@ public class PdfViewPage {
 		
 		final JWebBrowser browser = new JWebBrowser();
 		browser.setBounds(1, 1, 965, 770);
-		browser.navigate(document.getPath());
+		browser.navigate(document.getDocumentUrl());
 		browser.setStatusBarVisible(false);
 		browser.setMenuBarVisible(false);
 		browser.setLocationBarVisible(false);
 		browser.setButtonBarVisible(false);
 		panel.setLayout(new BorderLayout(0, 0));
 		panel.add(browser, BorderLayout.CENTER);
-		
-		
 		
 		signButton = new JButton("İMZALA");
 		signButton.setBackground(Color.GREEN);
@@ -83,8 +59,10 @@ public class PdfViewPage {
 			public void mouseClicked(MouseEvent arg0) {
 				EventQueue.invokeLater(new Runnable() {
 	    			public void run() {
+	    				UIUtils.setPreferredLookAndFeel();
+	    				NativeInterface.open();
 	    				try {
-	    					PasswordPage passwordPage = new PasswordPage(document);
+	    					PasswordPage passwordPage = new PasswordPage(document,listView,frmDkmanGrntleme);
 	    					passwordPage.getFrame().setVisible(true);
 	    				} catch (Exception e) {
 	    					e.printStackTrace();
@@ -127,12 +105,12 @@ public class PdfViewPage {
 		
 		JLabel lblDkmanSahibi = new JLabel("Döküman Sahibi:");
 		lblDkmanSahibi.setFont(new Font("Tahoma", Font.BOLD, 13));
-		lblDkmanSahibi.setBounds(353, 26, 132, 16);
+		lblDkmanSahibi.setBounds(323, 26, 110, 16);
 		panel_1.add(lblDkmanSahibi);
 		
 		JLabel lblTarih = new JLabel("Tarih:");
 		lblTarih.setFont(new Font("Tahoma", Font.BOLD, 13));
-		lblTarih.setBounds(644, 26, 59, 16);
+		lblTarih.setBounds(598, 26, 59, 16);
 		panel_1.add(lblTarih);
 		
 		JLabel label = new JLabel("");
@@ -144,21 +122,21 @@ public class PdfViewPage {
 		docName.setFont(new Font("Tahoma", Font.BOLD, 13));
 		docName.setBounds(34, 52, 307, 16);
 		panel_1.add(docName);
-		docName.setText(document.getName());
+		docName.setText(document.getName().split("_")[0]);
 		
 		JLabel docOwner = new JLabel("sahip");
 		docOwner.setForeground(Color.RED);
 		docOwner.setFont(new Font("Tahoma", Font.BOLD, 13));
-		docOwner.setBounds(353, 52, 291, 16);
+		docOwner.setBounds(323, 52, 171, 16);
 		panel_1.add(docOwner);
-		docOwner.setText(document.getOwner());
+		docOwner.setText(document.getClient());
 		
 		JLabel date = new JLabel("tarih");
 		date.setForeground(Color.RED);
 		date.setFont(new Font("Tahoma", Font.BOLD, 13));
-		date.setBounds(644, 52, 161, 16);
+		date.setBounds(598, 52, 161, 16);
 		panel_1.add(date);
-		date.setText(document.getDate().toString());
+		date.setText(document.getCrt_date());
 		
 		frmDkmanGrntleme.setResizable(false);
         frmDkmanGrntleme.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);

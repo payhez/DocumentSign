@@ -13,7 +13,10 @@ import java.awt.Font;
 import java.awt.Window;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.IOException;
 import java.awt.Color;
+import java.awt.Desktop;
 
 public class LogPage {
 
@@ -34,17 +37,11 @@ public class LogPage {
 			}
 		});
 	}
-
-	/**
-	 * Create the application.
-	 */
+	
 	public LogPage() {
 		initialize();
 	}
-
-	/**
-	 * Initialize the contents of the frame.
-	 */
+	
 	private void initialize() {
 		frame = new JFrame();
 		frame.setBounds(100, 100, 534, 208);
@@ -77,8 +74,20 @@ public class LogPage {
 		frame.getContentPane().add(lblVersion);
 		
 		JButton btnLog = new JButton("LOG");
+		btnLog.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				File file = new File("logs/exceptions.log");
+				try {
+					Desktop.getDesktop().open(file);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		});
 		btnLog.setFont(new Font("Tahoma", Font.BOLD, 15));
-		btnLog.setBounds(318, 72, 148, 35);
+		btnLog.setBounds(276, 72, 148, 35);
 		frame.getContentPane().add(btnLog);
 		
 		JButton btnExit = new JButton("ÇIKIŞ");
@@ -101,7 +110,6 @@ public class LogPage {
 		frame.setResizable(false);
         frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 	}
-	
 
 	public Window getFrame() {
 		// TODO Auto-generated method stub
