@@ -16,7 +16,6 @@ public class DocumentModel {
 	private String trid;
 	private String bytesData;
 	
-	
 	public String getBytesData() {
 		return bytesData;
 	}

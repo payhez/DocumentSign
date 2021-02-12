@@ -12,6 +12,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import com.intecon.docsign.config.ConfigPage;
+import com.intecon.docsign.log.LogCreator;
 import com.intecon.docsign.log.LogPage;
 
 public class AppRunner {
@@ -42,7 +43,7 @@ public class AppRunner {
 					    					ListPage listPage = new ListPage();
 					    					listPage.getFrame().setVisible(true);
 					    				} catch (Exception e) {
-					    					e.printStackTrace();
+					    					LogCreator.error("Couldn't open ListPage due to:" +e.toString(), AppRunner.class.getName());
 					    				}
 					    			}
 			        			  });
@@ -59,7 +60,7 @@ public class AppRunner {
 						    					ConfigPage configWindow = new ConfigPage();
 						    					configWindow.getFrame().setVisible(true);
 						    				} catch (Exception e) {
-						    					e.printStackTrace();
+						    					LogCreator.error("Couldn't open settings due to:" +e.toString(), AppRunner.class.getName());
 						    				}
 						    			}
 						    		});
@@ -76,7 +77,7 @@ public class AppRunner {
 						    					LogPage logWindow = new LogPage();
 						    					logWindow.getFrame().setVisible(true);
 						    				} catch (Exception e) {
-						    					e.printStackTrace();
+						    					LogCreator.error("Couldn't open LOG due to:" +e.toString(), AppRunner.class.getName());
 						    				}
 						    			}
 						    		});
@@ -102,7 +103,7 @@ public class AppRunner {
 					    					ListPage listPage = new ListPage();
 					    					listPage.getFrame().setVisible(true);
 					    				} catch (Exception e) {
-					    					e.printStackTrace();
+					    					LogCreator.error("Couldn't open ListPage due to:" +e.toString(), AppRunner.class.getName());
 					    				}
 					    			}
 					    		});
@@ -112,10 +113,10 @@ public class AppRunner {
 				          try {
 				            tray.add(trayIcon);
 				          } catch (AWTException e) {
-				            System.err.println("Can't add to tray");
+				        	LogCreator.error("Can't add tray! Code:" +e.toString(), AppRunner.class.getName());
 				          }
 					} else {
-				          System.err.println("Tray unavailable");
+						LogCreator.error("Tray Unavailable!", AppRunner.class.getName());
 			        }
 				}
 		    };

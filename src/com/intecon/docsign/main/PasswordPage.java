@@ -105,8 +105,7 @@ public class PasswordPage {
 							if(!theDir.exists()){
 								theDir.mkdirs();
 							}
-							signDocument("C:/temp/", "ALADDIN", thePassword, document.getDocumentUrl(), pathWithDate+document.getName(), false);
-							if(!signDocument("C:/temp/", "ALADDIN", thePassword, document.getDocumentUrl(), pathWithDate+document.getName(),true)) {
+							if(!signDocument("C:/temp/", "ALADDIN", thePassword, document.getDocumentUrl(), pathWithDate+document.getName())) {
 								JOptionPane.showMessageDialog(null,document.getName()+" dökümanı imzalanamamıştır!","İmzalama Başarısız!",JOptionPane.ERROR_MESSAGE);
 							}else {
 								
@@ -117,11 +116,14 @@ public class PasswordPage {
 								signedDocument.setCrt_date(LocalDate.now().toString());
 								signedDocument.setName(document.getName().split("_")[0]);
 								signedDocument.setFileExtansion(document.getFileExtansion());
-								//signedDocument.setDocumentUrl(document.getDocumentUrl()); // TODO this is gonna be changed with the one below
 								signedDocument.setDocumentUrl(pathWithDate+document.getName());
 								//signedDocument.setErpID(document.getErpID());
 								//signedDocument.setKey(document.getKey());
 								postFileToServer(signedDocument);
+								if(pdfViewFrame != null) {
+									pdfViewFrame.dispose();
+									Thread.sleep(100);
+								}
 								if(listView != null) {
 									listView.dispose();
 									EventQueue.invokeLater(new Runnable() {
@@ -130,18 +132,15 @@ public class PasswordPage {
 						    					ListPage listPage = new ListPage();
 						    					listPage.getFrame().setVisible(true);
 						    					listPage.getFrame().toBack();
-						    					Thread.sleep(500);
+						    					Thread.sleep(200);
 						    					listPage.getFrame().toFront();
 						    				} catch (Exception e) {
-						    					e.printStackTrace();
+						    					LogCreator.error("Couldn't open ListPage due to:" +e.toString(), PasswordPage.class.getName());
 						    				}
 						    			}
 						    		});
 								}
-								if(pdfViewFrame != null) {
-									pdfViewFrame.dispose();
-									Thread.sleep(500);
-								}
+								
 								deleteFileFromDirectory(document.getDocumentUrl());
 								LogCreator.info("The document:"+signedDocument.getName() +" is successfully signed!", PasswordPage.class.getName());
 								JOptionPane.showMessageDialog(null,document.getName()+" dökümanı başarıyla imzalanmıştır.","İmzalama Başarılı",JOptionPane.INFORMATION_MESSAGE);
@@ -184,9 +183,8 @@ public class PasswordPage {
 	}
 	
 	private static final String USER_AGENT = "Mozilla/5.0";
-	//private static final String POST_URL = "http://localhost:8080/DocumentSigningService/documentController/saveDocumentFromClient/";
 
-	private static final String POST_URL = "http://10.0.0.68:8080/demo/documentController/saveDocumentFromClient/";
+	private static final String POST_URL = "http://10.0.0.68:8080/DocumentSignService/documentController/saveDocumentFromClient/";
 	
 	private byte[] convertToBytes(String url) {
 		Path pdfPath = Paths.get(url);
@@ -233,27 +231,22 @@ public class PasswordPage {
 		}
 	}
 	
-	private boolean signDocument(String contextpath, String cardType, String password, String sourcePath, String loadPath, boolean action){
+	private boolean signDocument(String contextpath, String cardType, String password, String sourcePath, String loadPath){
 		
 		try {
 			Driver driver = new Driver(contextpath,cardType);
+			Provider provider = driver.getPKCSProvider();
 			java.security.cert.Certificate[] chain = driver.createCertificateChain(password);
-			if(chain == null && action) {
+			if(chain == null) {
 				LogCreator.error("Chain returned null!", PasswordPage.class.getName());
 			}
 			PrivateKey pk = driver.getPrivateKey(password);
-			Provider provider = driver.getPKCSProvider();
-			List<CrlClient> crlList = driver.getCrlList(chain);
 			OcspClient ocspClient = new OcspClientBouncyCastle();
+			List<CrlClient> crlList = driver.getCrlList(chain);
 			TSAClient tsaClient = driver.getTSAClient(chain);
-			if(action) {
-				driver.sign(sourcePath, loadPath, chain, pk, DigestAlgorithms.SHA256, provider.getName(), CryptoStandard.CMS, "Sign", "intecon", crlList, ocspClient, tsaClient, 0);
-			}
-			
+			driver.sign(sourcePath, loadPath, chain, pk, DigestAlgorithms.SHA256, provider.getName(), CryptoStandard.CMS, "Sign", "intecon", crlList, ocspClient, tsaClient, 0);
 		}catch(Exception e) {
-			if(action) {
-				LogCreator.error(e.toString(), PasswordPage.class.getName());
-			}
+			LogCreator.error(e.toString(), PasswordPage.class.getName());
 			return false;
 		}
 		

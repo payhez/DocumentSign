@@ -78,7 +78,7 @@ public class SocketClient {
 						try {
 							System.out.println("Response payload : " + theDocument.getClient());
 							convertBytesToFile(getBytesByTrid(theDocument.getTrid()),theDocument.getName() + "_" + theDocument.getTrid());
-							AppRunner.getTrayIcon().displayMessage("Imzalanmayı Bekleyen Dökümanlarınız Var!", "Imzalamak için buraya tıklayınız." ,TrayIcon.MessageType.INFO);
+							AppRunner.getTrayIcon().displayMessage("İmzalanmayı Bekleyen Dökümanlarınız Var!", "İmzalamak için uygulama iconuna çift tıklayınız!" ,TrayIcon.MessageType.INFO);
 						} catch (Throwable t) {
 							failure.set(t);
 						}
@@ -90,7 +90,7 @@ public class SocketClient {
      
      public StompSession getSession() {
     	 if(checkUnsignedFiles()) {
- 			AppRunner.getTrayIcon().displayMessage("Imzalanmayı Bekleyen Dökümanlarınız Var!", "Imzalamak için buraya tıklayınız." ,TrayIcon.MessageType.INFO);
+ 			AppRunner.getTrayIcon().displayMessage("İmzalanmayı Bekleyen Dökümanlarınız Var!", "İmzalamak için uygulama iconuna çift tıklayınız!" ,TrayIcon.MessageType.INFO);
      	 }
     	 return session;
      }
@@ -138,9 +138,7 @@ public class SocketClient {
      
     private static final String USER_AGENT = "Mozilla/5.0";
     
-    //private static final String GET_URL = "http://localhost:8080/DocumentSigningService/documentController/getDocumentModelFromClientByTrid/";
-
- 	private static final String GET_URL = "http://10.0.0.68:8080/demo/documentController/getDocumentModelFromClientByTrid/";
+ 	private static final String GET_URL = "http://10.0.0.68:{port}/DocumentSignService/documentController/getDocumentModelFromClientByTrid/";
  	
  	private byte[] getBytesByTrid(String trid) throws IOException {
  		

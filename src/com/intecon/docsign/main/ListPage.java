@@ -79,7 +79,7 @@ public class ListPage {
 			String pattern = "dd/MM/yyyy HH:mm:ss";
 			DateFormat df = new SimpleDateFormat(pattern);
 			theDocument.setCrt_date(df.format(createDate));
-			theDocument.setClient("");// TODO Here is gonna be name of the client
+			theDocument.setClient(ClientAppMain.getMacId());
 			theDocument.setDocumentUrl(theFile.getAbsolutePath());
 			theDocument.setName(theFile.getName());
 			theDocument.setFileExtansion("."+FilenameUtils.getExtension(theDocument.getDocumentUrl()));
