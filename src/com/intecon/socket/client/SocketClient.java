@@ -44,13 +44,13 @@ public class SocketClient {
 	 StompSession session;
 	 StompSessionHandler handler;
 	 String url;
-	 int port;
+	 public static String port = "8080";
+	 public static String ipAddress = "10.0.0.68";
 	 final WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
 	 String username;
 	 
-     public void setup(String url, int port, String username) {
+     public void setup(String url, String username) {
     	this.url = url;
-    	this.port = port;
     	this.username = username;
     	 
     	//final CountDownLatch latch = new CountDownLatch(1);
@@ -103,7 +103,7 @@ public class SocketClient {
     	 stompClient.stop();
      }
      
-     public void convertBytesToFile(byte[] bytes, String fileName) {
+     public static void convertBytesToFile(byte[] bytes, String fileName) {
     	String pathWithDate = "C:/Temp/UnSigned/" + LocalDate.now().toString() + "/";
     	File theDir = new File(pathWithDate);
  		if (!theDir.exists()){
@@ -138,9 +138,11 @@ public class SocketClient {
      
     private static final String USER_AGENT = "Mozilla/5.0";
     
- 	private static final String GET_URL = "http://10.0.0.68:{port}/DocumentSignService/documentController/getDocumentModelFromClientByTrid/";
+    
+ 	//private static final String GET_URL = "http://localhost:8080/DocumentSigningService/documentController/getDocumentModelFromClientByTrid/";
+ 	private static final String GET_URL = "http://"+ipAddress+":"+port+"/DocumentSignService/documentController/getDocumentModelFromClientByTrid/";
  	
- 	private byte[] getBytesByTrid(String trid) throws IOException {
+ 	public static byte[] getBytesByTrid(String trid) throws IOException {
  		
  		Gson gson = new Gson();
  		URL url = new URL(GET_URL+trid);

@@ -22,6 +22,8 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.Font;
+import java.awt.Frame;
+
 import javax.swing.JCheckBox;
 import javax.swing.JScrollPane;
 import javax.swing.JPanel;
@@ -82,7 +84,7 @@ public class ListPage {
 			theDocument.setClient(ClientAppMain.getMacId());
 			theDocument.setDocumentUrl(theFile.getAbsolutePath());
 			theDocument.setName(theFile.getName());
-			theDocument.setFileExtansion("."+FilenameUtils.getExtension(theDocument.getDocumentUrl()));
+			theDocument.setFileExtension("."+FilenameUtils.getExtension(theDocument.getDocumentUrl()));
 			docList.add(theDocument);
 		}
 		
@@ -144,6 +146,11 @@ public class ListPage {
 				}
 				
 				if(selectedDocs.size()>1) {
+					for (Frame frame : Frame.getFrames()) {
+						if(frame.getName().equals(PasswordPage.class.getSimpleName())) {
+							frame.dispose();
+						}
+					}
 					EventQueue.invokeLater(new Runnable() {
 		    			public void run() {
 		    				UIUtils.setPreferredLookAndFeel();
@@ -157,6 +164,11 @@ public class ListPage {
 		    			}
 		    		});
 				}else {
+					for (Frame frame : Frame.getFrames()) {
+						if(frame.getName().equals(PdfViewPage.class.getSimpleName())) {
+							frame.dispose();
+						}
+					}
 					EventQueue.invokeLater(new Runnable() {
 		    			public void run() {
 		    				NativeInterface.open();
@@ -251,6 +263,7 @@ public class ListPage {
 	public void setFrame(JFrame frame) {
 		this.frame = frame;
 		frame.setTitle("Döküman Listesi");
+		frame.setName(this.getClass().getSimpleName());
 	}
 }
 

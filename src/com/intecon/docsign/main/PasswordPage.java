@@ -17,6 +17,7 @@ import driver.Driver;
 
 import java.awt.EventQueue;
 import java.awt.Font;
+import java.awt.Frame;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.time.LocalDate;
@@ -78,6 +79,7 @@ public class PasswordPage {
 		}
 		
 		frmifreGiri = new JFrame();
+		frmifreGiri.setName(this.getClass().getSimpleName());
 		frmifreGiri.setTitle("Şifre Giriş");
 		frmifreGiri.setBounds(100, 100, 493, 273);
 		frmifreGiri.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -98,6 +100,7 @@ public class PasswordPage {
 				try {
 		        	int dialogResult = JOptionPane.showConfirmDialog(null, "Döküman(lar) imzalanacak. Onaylıyor musunuz?", "İmza Onayı", JOptionPane.YES_NO_OPTION);
 					if(dialogResult == JOptionPane.YES_OPTION){
+						frmifreGiri.dispose();
 						for (DocumentModel document: documents) {
 							document.setTrid(trimTrid(document.getName()));
 							String pathWithDate = SIGNED_URL+LocalDate.now()+"/";
@@ -110,48 +113,51 @@ public class PasswordPage {
 							}else {
 								
 								DocumentModel signedDocument = new DocumentModel();
-								signedDocument.setSigned(true);
 								signedDocument.setTrid(trimTrid(document.getName()));
 								signedDocument.setClient(document.getClient());
-								signedDocument.setCrt_date(LocalDate.now().toString());
 								signedDocument.setName(document.getName().split("_")[0]);
-								signedDocument.setFileExtansion(document.getFileExtansion());
+								signedDocument.setFileExtension(document.getFileExtension());
 								signedDocument.setDocumentUrl(pathWithDate+document.getName());
-								//signedDocument.setErpID(document.getErpID());
-								//signedDocument.setKey(document.getKey());
 								postFileToServer(signedDocument);
-								if(pdfViewFrame != null) {
-									pdfViewFrame.dispose();
-									Thread.sleep(100);
-								}
-								if(listView != null) {
-									listView.dispose();
-									EventQueue.invokeLater(new Runnable() {
-						    			public void run() {
-						    				try {
-						    					ListPage listPage = new ListPage();
-						    					listPage.getFrame().setVisible(true);
-						    					listPage.getFrame().toBack();
-						    					Thread.sleep(200);
-						    					listPage.getFrame().toFront();
-						    				} catch (Exception e) {
-						    					LogCreator.error("Couldn't open ListPage due to:" +e.toString(), PasswordPage.class.getName());
-						    				}
-						    			}
-						    		});
-								}
 								
+								for (Frame frame : Frame.getFrames()) {
+									if(frame.getName().equals(PdfViewPage.class.getSimpleName())) {
+										frame.dispose();
+									}
+								}
+								Thread.sleep(100);
 								deleteFileFromDirectory(document.getDocumentUrl());
 								LogCreator.info("The document:"+signedDocument.getName() +" is successfully signed!", PasswordPage.class.getName());
-								JOptionPane.showMessageDialog(null,document.getName()+" dökümanı başarıyla imzalanmıştır.","İmzalama Başarılı",JOptionPane.INFORMATION_MESSAGE);
+								if(documents.size() == 1) {
+									JOptionPane.showMessageDialog(null,document.getName()+" dökümanı başarıyla imzalanmıştır.","İmzalama Başarılı",JOptionPane.INFORMATION_MESSAGE);
+								}else if(documents.get(documents.size()-1) == document) {
+									JOptionPane.showMessageDialog(null,"Seçilen dökümanlar başarıyla imzalanmıştır.","İmzalama Başarılı",JOptionPane.INFORMATION_MESSAGE);
+
+								}
 							}
+						}
+						
+						if(listView != null) {
+							listView.dispose();
+							EventQueue.invokeLater(new Runnable() {
+				    			public void run() {
+				    				try {
+				    					ListPage listPage = new ListPage();
+				    					listPage.getFrame().setVisible(true);
+				    					listPage.getFrame().toBack();
+				    					Thread.sleep(100);
+				    					listPage.getFrame().toFront();
+				    				} catch (Exception e) {
+				    					LogCreator.error("Couldn't open ListPage due to:" +e.toString(), PasswordPage.class.getName());
+				    				}
+				    			}
+				    		});
 						}
 					} 
 				}catch(Exception e1) {
 					LogCreator.error("The document couldn't be signed due to:" +e1.toString(), PasswordPage.class.getName());
 					JOptionPane.showMessageDialog(null,e1.toString(),"İmzalama Başarısız",JOptionPane.ERROR_MESSAGE);
 				}
-				frmifreGiri.dispose();
 			}
 		});
 		submit.setBounds(47, 167, 145, 48);

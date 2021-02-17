@@ -2,6 +2,7 @@ package com.intecon.docsign.main;
 
 import java.awt.AWTException;
 import java.awt.EventQueue;
+import java.awt.Frame;
 import java.awt.Image;
 import java.awt.MenuItem;
 import java.awt.PopupMenu;
@@ -37,6 +38,11 @@ public class AppRunner {
 				          MenuItem item = new MenuItem("İmza Bekleyen Dökümanlar");
 				          item.addActionListener(new ActionListener() {
 				        	  public void actionPerformed(ActionEvent e) {
+				        		  for (Frame frame : Frame.getFrames()) {
+										if(frame.getName().equals(ListPage.class.getSimpleName())) {
+											frame.dispose();
+										}
+									}
 			        			  EventQueue.invokeLater(new Runnable() {
 					    			public void run() {
 					    				try {
@@ -96,7 +102,11 @@ public class AppRunner {
 				          trayIcon.addActionListener(new ActionListener() {
 							@Override
 							public void actionPerformed(ActionEvent e) {
-								// TODO Auto-generated method stub
+								for (Frame frame : Frame.getFrames()) {
+									if(frame.getName().equals(ListPage.class.getSimpleName())) {
+										frame.dispose();
+									}
+								}
 					        	EventQueue.invokeLater(new Runnable() {
 					    			public void run() {
 					    				try {
@@ -122,5 +132,4 @@ public class AppRunner {
 		    };
 		    EventQueue.invokeLater(runner);
 	}
-
 }

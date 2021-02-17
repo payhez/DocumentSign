@@ -16,6 +16,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.JLabel;
 import java.awt.Font;
+import java.awt.Frame;
 import java.awt.Color;
 import java.awt.SystemColor;
 
@@ -32,13 +33,14 @@ public class PdfViewPage {
 	
 	private void initialize(DocumentModel document) {
 		frmDkmanGrntleme = new JFrame();
+		frmDkmanGrntleme.setName(this.getClass().getSimpleName());
 		frmDkmanGrntleme.setTitle("Döküman Görüntüleme");
 		frmDkmanGrntleme.setBounds(100, 70, 954, 782);
 		frmDkmanGrntleme.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmDkmanGrntleme.getContentPane().setLayout(null);
 		
 		JPanel panel = new JPanel();
-		panel.setBounds(10, 98, 1145, 772);
+		panel.setBounds(10, 98, 930, 646);
 		frmDkmanGrntleme.getContentPane().add(panel);
 		
 		final JWebBrowser browser = new JWebBrowser();
@@ -57,6 +59,11 @@ public class PdfViewPage {
 		signButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
+				for (Frame frame : Frame.getFrames()) {
+					if(frame.getName().equals(PasswordPage.class.getSimpleName())) {
+						frame.dispose();
+					}
+				}
 				EventQueue.invokeLater(new Runnable() {
 	    			public void run() {
 	    				UIUtils.setPreferredLookAndFeel();
