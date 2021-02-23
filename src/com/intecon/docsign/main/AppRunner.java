@@ -12,13 +12,15 @@ import java.awt.TrayIcon;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import com.intecon.docsign.config.ConfigPage;
-import com.intecon.docsign.log.LogCreator;
-import com.intecon.docsign.log.LogPage;
+import com.intecon.docsign.service.ConfigService;
+import com.intecon.docsign.view.ConfigPage;
+import com.intecon.docsign.view.ListPage;
+import com.intecon.docsign.view.LogPage;
+import com.intecon.log.LogCreator;
 
 public class AppRunner {
 	
-	private static Image image = Toolkit.getDefaultToolkit().getImage("C:/temp/resources/icon.png");
+	private static Image image = Toolkit.getDefaultToolkit().getImage(ConfigService.getSmallIconPath());
     private static PopupMenu popup = new PopupMenu();
 	private static TrayIcon trayIcon = new TrayIcon(image, "Intecon Döküman İmzalama", popup);
 	
@@ -95,6 +97,7 @@ public class AppRunner {
 				          item.addActionListener(new ActionListener() {
 				        	  public void actionPerformed(ActionEvent e) {
 				        		  tray.remove(trayIcon);
+				        		  System.exit(1);
 			        		  }
 				          });
 				          popup.add(item);
