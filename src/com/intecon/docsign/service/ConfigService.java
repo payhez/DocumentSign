@@ -2,11 +2,7 @@ package com.intecon.docsign.service;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
 import java.util.Properties;
-
-import com.intecon.log.LogCreator;
 
 public class ConfigService {
 	
@@ -57,20 +53,5 @@ public class ConfigService {
 	}
 	public static String getConfigFilePath() {
 		return read().getProperty("CONFIG-FILE-PATH");
-	}
-	
-	public static String getMacId() {
-		String macId = null;
-		
-		try {
-			InetAddress localHost = InetAddress.getLocalHost();
-			NetworkInterface ni = NetworkInterface.getByInetAddress(localHost);
-			macId = ni.getHardwareAddress().toString();
-			macId= "furat";
-		}catch(Exception e) {
-			LogCreator.error("Couldn't get MAC Address due to: "+e.toString(), ConfigService.class.getName());
-		}
-		
-		return macId;
 	}
 }

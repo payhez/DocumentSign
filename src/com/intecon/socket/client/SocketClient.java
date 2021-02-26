@@ -37,7 +37,6 @@ import com.intecon.docsign.service.ConfigService;
 import com.intecon.docsign.view.LogPage;
 import com.intecon.docsign.view.PasswordPage;
 import com.intecon.log.LogCreator;
-import com.intecon.socket.client.TestSessionHandler;
 
 public class SocketClient {
 
@@ -142,7 +141,7 @@ public class SocketClient {
  	}
  	
 	static String signed = "false";
-	private static final String GET_URL_UNSIGNED = "http://"+ConfigService.getServerIp()+":"+ConfigService.getServerPort()+"/DocumentSignService/documentController/getDocumentModelFromClient/"+ConfigService.getMacId()+"/"+signed;
+	private static final String GET_URL_UNSIGNED = "http://"+ConfigService.getServerIp()+":"+ConfigService.getServerPort()+"/DocumentSignService/documentController/getDocumentModelFromClient/"+appService.getMacId()+"/"+signed;
 	  
 	public static List<DocumentModel> getUnsignedDocuments() throws IOException {
 	 		
@@ -154,7 +153,6 @@ public class SocketClient {
  		con.setRequestProperty("User-Agent", USER_AGENT);
  		con.setRequestMethod("GET");
 		int responseCode = con.getResponseCode();
-		System.out.println("GET Response Code :: " + responseCode);
 		if (responseCode == HttpURLConnection.HTTP_OK) { // success
 			BufferedReader in = new BufferedReader(new InputStreamReader(
 					con.getInputStream(),"UTF-8"));
@@ -212,7 +210,7 @@ public class SocketClient {
 		}
 	}
 	
-	private static final String GET_URL_LOG = "http://"+ConfigService.getServerIp()+":"+ConfigService.getServerPort()+"/DocumentSignService/documentController/getAllLogsForUser/"+ConfigService.getMacId();
+	private static final String GET_URL_LOG = "http://"+ConfigService.getServerIp()+":"+ConfigService.getServerPort()+"/DocumentSignService/documentController/getAllLogsForUser/"+appService.getMacId();
 	
 	public static List<LogModel> getLogsForUser() throws IOException {
 	 		

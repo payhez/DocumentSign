@@ -13,13 +13,13 @@ import com.intecon.socket.client.SocketClient;
 public class ClientAppMain {
 	
 	static ApplicationService appService = new ApplicationService();
-	private static String macId= ConfigService.getMacId();
+	private static String macId= appService.getMacId();
 
 	public static void main(String args[]) {
 		  String url = "ws://"+ConfigService.getServerIp()+":"+ConfigService.getServerPort()+"/DocumentSignService/gs-guide-websocket";
 		  
 		  appService.createFolders(); // Creates necessary folders(SIGNED, UNSIGNED)
-		  appService.clearUnsignedFolder(); // Deletes unnecessary folders in the start
+		  appService.clearUnsignedFolder(); // Deletes unnecessary date folders
 		  
 		  try {
 			  AppRunner.runApp(); // Runs the app with TrayIcon components

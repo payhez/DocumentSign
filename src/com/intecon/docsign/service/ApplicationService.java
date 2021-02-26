@@ -6,6 +6,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
@@ -34,11 +36,12 @@ public class ApplicationService {
 		 }
 	  }
 	  
-	  public void  checkUnsignedDocumentsFromServer() {
+	  public List<DocumentModel>  checkUnsignedDocumentsFromServer() {
 		  
 		  List<String> tridList = getExistingTridList();
+		  List<DocumentModel> docList = new ArrayList<DocumentModel>();
 		  try {
-			  	List<DocumentModel> docList = SocketClient.getUnsignedDocuments();
+			  	docList = SocketClient.getUnsignedDocuments();
 				for(DocumentModel doc : docList) {
 					boolean found = false;
 					for(String theTrid : tridList) {
@@ -53,8 +56,9 @@ public class ApplicationService {
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				LogCreator.error("checkUnsignedDocumentsFromServer did not work due to: " + e.toString(), ClientAppMain.class.getName());
+				return null;
 			}
-		  
+		  return docList;
 	  }
 	  
 	  public  String trimTrid(String docName) {
@@ -119,6 +123,19 @@ public class ApplicationService {
 			 return true;
 	 	}
 	  
+	  public java.util.List<File> getFilesFromFolder(File folder) {
+			
+			java.util.List<File> files = new ArrayList<File>();
+		    for (final File fileEntry : folder.listFiles()) {
+		        if (fileEntry.isDirectory()) {
+		        	files.addAll(getFilesFromFolder(fileEntry));
+		        } else {
+		        	files.add(fileEntry);
+		        }
+		    }
+			return files;
+		}
+	  
 	  public void convertBytesToFile(byte[] bytes, String fileName) {
 	    	String pathWithDate = ConfigService.getUnsignedPath() + LocalDate.now().toString() + "/";
 	    	File theDir = new File(pathWithDate);
@@ -151,4 +168,19 @@ public class ApplicationService {
 	        byte[] bytes = bos.toByteArray();
 	        return bytes;
 	 }
+     
+     public String getMacId() {
+ 		String macId = null;
+ 		
+ 		try {
+ 			InetAddress localHost = InetAddress.getLocalHost();
+ 			NetworkInterface ni = NetworkInterface.getByInetAddress(localHost);
+ 			macId = ni.getHardwareAddress().toString();
+ 			macId= "furat";
+ 		}catch(Exception e) {
+ 			LogCreator.error("Couldn't get MAC Address due to: "+e.toString(), ConfigService.class.getName());
+ 		}
+ 		
+ 		return macId;
+ 	}
 }

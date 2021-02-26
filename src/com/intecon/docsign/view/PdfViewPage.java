@@ -20,7 +20,9 @@ import javax.swing.JLabel;
 import java.awt.Font;
 import java.awt.Frame;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.SystemColor;
+import java.awt.Toolkit;
 
 public class PdfViewPage {
 
@@ -35,8 +37,21 @@ public class PdfViewPage {
 		frmDkmanGrntleme = new JFrame();
 		frmDkmanGrntleme.setName(this.getClass().getSimpleName());
 		frmDkmanGrntleme.setTitle("Döküman Görüntüleme");
-		frmDkmanGrntleme.setBounds(100, 70, 954, 782);
+		frmDkmanGrntleme.setSize(954, 782);
+		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+		frmDkmanGrntleme.setLocation(dim.width/2-frmDkmanGrntleme.getSize().width/2, dim.height/2-frmDkmanGrntleme.getSize().height/2);
 		frmDkmanGrntleme.getContentPane().setLayout(null);
+		frmDkmanGrntleme.addWindowListener(new java.awt.event.WindowAdapter() {
+	        @Override
+	        public void windowClosed(java.awt.event.WindowEvent windowEvent) {
+	        	for (Frame frame : Frame.getFrames()) {
+					if(frame.getName().equals(ListPage.class.getSimpleName())) {
+						frame.setEnabled(true);
+						frame.toFront();
+					}
+				}
+	        }
+	    });
 		
 		JPanel panel = new JPanel();
 		panel.setBounds(10, 98, 930, 646);
@@ -59,7 +74,7 @@ public class PdfViewPage {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
 				for (Frame frame : Frame.getFrames()) {
-					if(frame.getName().equals(PasswordPage.class.getSimpleName()) || frame.getName().equals(ListPage.class.getSimpleName())) {
+					if(frame.getName().equals(PasswordPage.class.getSimpleName())) {
 						frame.dispose();
 					}
 				}
@@ -70,6 +85,7 @@ public class PdfViewPage {
 	    				try {
 	    					PasswordPage passwordPage = new PasswordPage(document);
 	    					passwordPage.getFrame().setVisible(true);
+	    					frmDkmanGrntleme.setEnabled(false);
 	    				} catch (Exception e) {
 	    					e.printStackTrace();
 	    				}

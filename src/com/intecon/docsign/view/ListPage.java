@@ -1,28 +1,27 @@
 package com.intecon.docsign.view;
 
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 
 import com.intecon.docsign.model.DocumentModel;
 import com.intecon.docsign.service.ApplicationService;
 import com.intecon.docsign.service.ConfigService;
-import com.intecon.log.LogCreator;
-import com.intecon.socket.client.SocketClient;
 
 import chrriis.common.UIUtils;
 import chrriis.dj.nativeswing.swtimpl.NativeInterface;
 
 import java.awt.Font;
 import java.awt.Frame;
+import java.awt.Toolkit;
 import java.awt.event.MouseAdapter;
 
 import javax.swing.JScrollPane;
@@ -54,20 +53,19 @@ public class ListPage {
 			}
 		});
 	}
-
-	/**
-	 * Create the application.
-	 */
 	public ListPage() {
 		initialize();
 	}
-
-	/**
-	 * Initialize the contents of the frame.
-	 */
+	
 	private void initialize() {
 		setFrame( new JFrame());
-		String column[]={"SEÇ","DÖKÜMAN ADI","DÖKÜMAN TARİHİ","DÖKÜMAN SAHİBİ"};
+		
+		JScrollPane scrollPane = new JScrollPane();
+		JButton btnSign = new JButton("Seçiliyi İmzala");
+		JButton btnDelete = new JButton("Seçiliyi Çıkar");
+		JButton selectAll = new JButton(selectAllText);
+		
+		String column[]={"SEÇ","DOKÜMAN ADI","DOKÜMAN TARİHİ","DOKÜMAN SAHİBİ"};
 		DefaultTableModel model = new DefaultTableModel(column, 0) {
 			
 			private static final long serialVersionUID = 1L;
@@ -90,21 +88,44 @@ public class ListPage {
 			  }
 		};
 		
+		java.util.List<DocumentModel> docList = appService.checkUnsignedDocumentsFromServer();
 		File path = new File(UNSIGNED_URL);
-		java.util.List<File> files = getFilesFromFolder(path);
-		java.util.List<DocumentModel> docList = null;
+		java.util.List<File> files = appService.getFilesFromFolder(path);
 		
-		try {
-			docList = SocketClient.getUnsignedDocuments();
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			LogCreator.error("getUnsignedDocuments did not work due to: " + e1.toString(), ListPage.class.getName());
+		if(docList.isEmpty()) {
+			JOptionPane.showMessageDialog(null,"İmza bekleyen dokümanınız bulunmamaktadır!","Klasör Boş",JOptionPane.INFORMATION_MESSAGE);
+			frame.dispose();
+		}else {
+			table = new JTable(model);
+			table.getColumnModel().getColumn(0).setPreferredWidth(20);
+			table.getColumnModel().getColumn(0).setResizable(false);
+			table.getColumnModel().getColumn(1).setPreferredWidth(320);
+			table.getColumnModel().getColumn(2).setPreferredWidth(200);
+			table.getColumnModel().getColumn(3).setPreferredWidth(100);
+			table.setRowHeight(table.getRowHeight() + 14);
+			scrollPane.setViewportView(table);
+			table.setFont(new Font("Tahoma", Font.BOLD, 14));
+			table.setRowSelectionAllowed(false);
+			table.getModel().addTableModelListener(new TableModelListener() {
+				
+				@Override
+				public void tableChanged(TableModelEvent e) {
+					btnSign.setEnabled(false);
+	        		btnDelete.setEnabled(false);
+	        		selectAll.setText(selectAllText);
+					for (int i = 0; i < table.getRowCount(); i++) {
+						if(table.getValueAt(i, 0) == Boolean.TRUE) {
+							btnSign.setEnabled(true);
+			        		btnDelete.setEnabled(true);
+			        		selectAll.setText(unSelectAllText);
+						}
+					}
+					
+				}
+			});
 		}
-		appService.checkUnsignedDocumentsFromServer();
 		
-		final java.util.List<DocumentModel> documentList = docList;
-		
-		for (DocumentModel documentModel : documentList) {
+		for (DocumentModel documentModel : docList) {
 			Object [] row  = {Boolean.FALSE, documentModel.getName(),documentModel.getCrt_date(), documentModel.getClient()};
 			model.addRow(row);
 			for(File theFile : files) {
@@ -115,11 +136,9 @@ public class ListPage {
 		}
 		frame.getContentPane().setLayout(null);
 		
-		JScrollPane scrollPane = new JScrollPane();
 		scrollPane.setBounds(10, 61, 925, 434);
 		frame.getContentPane().add(scrollPane);
 		
-		JButton btnSign = new JButton("Seçiliyi İmzala");
 		btnSign.setFont(new Font("Tahoma", Font.BOLD, 15));
 		btnSign.setEnabled(false);
 		btnSign.setBounds(419, 505, 164, 101);
@@ -127,60 +146,62 @@ public class ListPage {
 		btnSign.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(java.awt.event.MouseEvent arg0) {
-				String selectedItem = null;
-
-				selectedDocs.clear();
-				int[] selectedRowIndices = table.getSelectedRows();
-				for (int i = 0; i < table.getSelectedRowCount(); i++) {
-					selectedItem=(String) table.getValueAt(selectedRowIndices[i],1);
-					for(DocumentModel document : documentList) {
-						if( document.getName().equals(selectedItem)) {
-							selectedDocs.add(document);
+				if(btnSign.isEnabled()) {
+					String selectedItem = null;
+					selectedDocs.clear();
+					for (int i = 0; i < table.getRowCount(); i++) {
+						if(table.getValueAt(i, 0) == Boolean.TRUE) {
+							selectedItem=(String) table.getValueAt(i,1);
+							for(DocumentModel document : docList) {
+								if( document.getName().equals(selectedItem)) {
+									selectedDocs.add(document);
+								}
+							}
 						}
 					}
-				}
-				if(selectedDocs.size()>1) {
-					for (Frame frame : Frame.getFrames()) {
-						if(frame.getName().equals(PasswordPage.class.getSimpleName())) {
-							frame.dispose();
+					if(selectedDocs.size()>1) {
+						for (Frame frame : Frame.getFrames()) {
+							if(frame.getName().equals(PasswordPage.class.getSimpleName())) {
+								frame.dispose();
+							}
 						}
-					}
-					EventQueue.invokeLater(new Runnable() {
-		    			public void run() {
-		    				UIUtils.setPreferredLookAndFeel();
-		    				NativeInterface.open();
-		    				try {
-		    					PasswordPage view = new PasswordPage(selectedDocs);
-		    					view.getFrame().setVisible(true);
-		    					frame.dispose();
-		    				} catch (Exception e) {
-		    					e.printStackTrace();
-		    				}
-		    			}
-		    		});
-				}else {
-					for (Frame frame : Frame.getFrames()) {
-						if(frame.getName().equals(PdfViewPage.class.getSimpleName())) {
-							frame.dispose();
+						EventQueue.invokeLater(new Runnable() {
+			    			public void run() {
+			    				UIUtils.setPreferredLookAndFeel();
+			    				NativeInterface.open();
+			    				try {
+			    					PasswordPage view = new PasswordPage(selectedDocs);
+			    					view.getFrame().setVisible(true);
+			    					frame.setEnabled(false);
+			    				} catch (Exception e) {
+			    					e.printStackTrace();
+			    				}
+			    			}
+			    		});
+					}else {
+						for (Frame frame : Frame.getFrames()) {
+							if(frame.getName().equals(PdfViewPage.class.getSimpleName())) {
+								frame.dispose();
+							}
 						}
+						EventQueue.invokeLater(new Runnable() {
+			    			public void run() {
+			    				NativeInterface.open();
+			    				try {
+			    					PdfViewPage view = new PdfViewPage(selectedDocs.get(0));
+			    					view.getFrame().setVisible(true);
+			    					frame.setEnabled(false);
+			    				} catch (Exception e) {
+			    					e.printStackTrace();
+			    				}
+			    			}
+			    		});
 					}
-					EventQueue.invokeLater(new Runnable() {
-		    			public void run() {
-		    				NativeInterface.open();
-		    				try {
-		    					PdfViewPage view = new PdfViewPage(selectedDocs.get(0));
-		    					view.getFrame().setVisible(true);
-		    				} catch (Exception e) {
-		    					e.printStackTrace();
-		    				}
-		    			}
-		    		});
 				}
 			}
 		});
 		frame.getContentPane().add(btnSign);
 		
-		JButton btnDelete = new JButton("Seçiliyi Çıkar");
 		btnDelete.setFont(new Font("Tahoma", Font.BOLD, 15));
 		btnDelete.setEnabled(false);
 		btnDelete.setBounds(595, 505, 164, 101);
@@ -197,7 +218,6 @@ public class ListPage {
 		});
 		frame.getContentPane().add(btnExit);
 		
-		JButton selectAll = new JButton(selectAllText);
 		selectAll.setFont(new Font("Tahoma", Font.BOLD, 12));
 		selectAll.setBounds(10, 506, 172, 41);
 		frame.getContentPane().add(selectAll);
@@ -210,75 +230,18 @@ public class ListPage {
 			@Override
 			public void mouseClicked(java.awt.event.MouseEvent e) {
 				if(selectAll.getText().equals(selectAllText)) {
-					table.selectAll();
 					selectAll.setText(unSelectAllText);
-					btnSign.setEnabled(true);
-					btnDelete.setEnabled(true);
-					for (int row : table.getSelectedRows()) {
-		        		table.setValueAt(Boolean.TRUE, row, 0);
+					for (int i =0; i<table.getRowCount(); i++) {
+		        		table.setValueAt(Boolean.TRUE, i, 0);
 					}
 				}else {
-					table.clearSelection();
 					selectAll.setText(selectAllText);
-					btnSign.setEnabled(false);
-					btnDelete.setEnabled(false);
 					for (int i =0; i<table.getRowCount(); i++) {
 		        		table.setValueAt(Boolean.FALSE, i, 0);
 					}
 				}
-				
 			}
 		});
-		
-		if(docList.isEmpty()) {
-			JOptionPane.showMessageDialog(null,"İmza bekleyen dökümanınız bulunmamaktadır!","Klasör Boş",JOptionPane.INFORMATION_MESSAGE);
-			frame.dispose();
-		}else {
-			table = new JTable(model);
-			table.getColumnModel().getColumn(0).setPreferredWidth(20);
-			table.getColumnModel().getColumn(1).setPreferredWidth(320);
-			table.getColumnModel().getColumn(2).setPreferredWidth(200);
-			table.getColumnModel().getColumn(3).setPreferredWidth(100);
-			table.setRowHeight(table.getRowHeight() + 14);
-			scrollPane.setViewportView(table);
-			table.setFont(new Font("Tahoma", Font.BOLD, 14));
-			table.getSelectionModel().addListSelectionListener(new ListSelectionListener(){
-		        public void valueChanged(ListSelectionEvent event) {
-		        	if(table.getSelectionModel().isSelectionEmpty()) {
-		        		btnSign.setEnabled(false);
-		        		btnDelete.setEnabled(false);
-		        		selectAll.setText(selectAllText);
-		        		for (int i =0; i<table.getRowCount(); i++) {
-			        		table.setValueAt(Boolean.FALSE, i, 0);
-						}
-		        	}else {
-		        		btnSign.setEnabled(true);
-		        		btnDelete.setEnabled(true);
-		        		selectAll.setText(unSelectAllText);
-		        		for (int i =0; i<table.getRowCount(); i++) {
-			        		table.setValueAt(Boolean.FALSE, i, 0);
-						}
-		        		int[] selectedRowIndices = table.getSelectedRows();
-		        		for (int indice : selectedRowIndices) {
-			        		table.setValueAt(Boolean.TRUE, indice, 0);
-
-						}
-		        	}
-		        }
-		    });
-		}
-	}
-	public java.util.List<File> getFilesFromFolder(File folder) {
-		
-		java.util.List<File> files = new ArrayList<File>();
-	    for (final File fileEntry : folder.listFiles()) {
-	        if (fileEntry.isDirectory()) {
-	        	files.addAll(getFilesFromFolder(fileEntry));
-	        } else {
-	        	files.add(fileEntry);
-	        }
-	    }
-		return files;
 	}
 	
 	public JFrame getFrame() {
@@ -286,10 +249,12 @@ public class ListPage {
 	}
 	public void setFrame(JFrame frame) {
 		this.frame = frame;
-		frame.setBounds(100, 100, 963, 661);
+		frame.setSize(963, 661);
 		frame.setResizable(false);
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		frame.setTitle("Döküman Listesi");
+		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+		frame.setLocation(dim.width/2-frame.getSize().width/2, dim.height/2-frame.getSize().height/2);
 		frame.setName(this.getClass().getSimpleName());
 	}
 }
